@@ -1,63 +1,741 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>todalum</title>
-    <link href="styles/style.css" rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Montserrat"
-      rel="stylesheet"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AluminioFundido — ARMOCARSA/TODALUM</title>
+    <meta name="description" content="Más de 50 años de experiencia en inyección a presión de aluminio y moldeo por coquilla en Venezuela.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'forge-dark': '#0d0f12',
+              'forge-charcoal': '#1a1d23',
+              'forge-slate': '#2d3139',
+              'forge-steel': '#4a5568',
+              'forge-silver': '#a0aec0',
+              'forge-light': '#e2e8f0',
+              'molten': '#e85d04',
+              'molten-dark': '#c44b00',
+              'aluminum': '#c0c5ce',
+              'blueprint': '#1e3a5f',
+            },
+            fontFamily: {
+              display: ['Oswald', 'sans-serif'],
+              body: ['Source Serif 4', 'serif'],
+              mono: ['Space Mono', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      
+      .blueprint-grid {
+        background-image: 
+          linear-gradient(rgba(30, 58, 95, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(30, 58, 95, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+      }
+      
+      .metallic-text {
+        background: linear-gradient(135deg, #e2e8f0 0%, #a0aec0 50%, #e2e8f0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .section-number {
+        font-family: 'Oswald', sans-serif;
+        font-size: clamp(8rem, 25vw, 20rem);
+        font-weight: 700;
+        line-height: 0.75;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(168, 85, 4, 0.3);
+        position: absolute;
+        user-select: none;
+        pointer-events: none;
+        z-index: 0;
+        letter-spacing: -0.05em;
+      }
+      
+      .molten-line {
+        height: 3px;
+        background: linear-gradient(90deg, #e85d04 0%, #ff7b2e 50%, #e85d04 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .molten-line::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 3s infinite;
+      }
+      
+      @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+      }
+      
+      .client-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .client-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent 0%, rgba(232, 93, 4, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+      
+      .client-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+      }
+      
+      .client-card:hover::before {
+        opacity: 1;
+      }
+      
+      .tech-bracket {
+        position: relative;
+      }
+      
+      .tech-bracket::before,
+      .tech-bracket::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e85d04;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+      }
+      
+      .tech-bracket::before {
+        top: -10px;
+        left: -10px;
+        border-right: none;
+        border-bottom: none;
+      }
+      
+      .tech-bracket::after {
+        bottom: -10px;
+        right: -10px;
+        border-left: none;
+        border-top: none;
+      }
+      
+      .tech-bracket:hover::before,
+      .tech-bracket:hover::after {
+        width: 30px;
+        height: 30px;
+        opacity: 1;
+      }
+      
+      .video-overlay {
+        background: linear-gradient(
+          135deg,
+          rgba(13, 15, 18, 0.95) 0%,
+          rgba(13, 15, 18, 0.7) 40%,
+          rgba(13, 15, 18, 0.5) 100%
+        );
+      }
+      
+      .grain-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+      
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .reveal-delay-1 { transition-delay: 0.1s; }
+      .reveal-delay-2 { transition-delay: 0.2s; }
+      .reveal-delay-3 { transition-delay: 0.3s; }
+      .reveal-delay-4 { transition-delay: 0.4s; }
+      
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0d0f12;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #e85d04;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #ff7b2e;
+      }
+      
+      .blueprint-dots {
+        background-image: radial-gradient(rgba(30, 58, 95, 0.3) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      
+      .service-card {
+        background: linear-gradient(145deg, #1a1d23 0%, #2d3139 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .service-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.03) 50%,
+          transparent 70%
+        );
+        transform: rotate(30deg);
+        transition: all 0.6s ease;
+        pointer-events: none;
+      }
+      
+      .service-card:hover::after {
+        transform: rotate(30deg) translate(20%, 20%);
+      }
+      
+      .form-input:focus {
+        border-color: #e85d04;
+        box-shadow: 0 0 0 1px #e85d04;
+      }
+      
+      .mobile-menu {
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+        pointer-events: none;
+      }
+      
+      .mobile-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+    </style>
   </head>
 
-  <body
-    background="public/images/ARMO.jpg"
-    style="
-      background-size: cover;
-      background-repeat: no-repeat;
-      color: white;
-      font-family: 'Courier New', Courier, monospace;
-      margin: 30px;
-    "
-  >
-    <div class="header">
-      <h1 style="text-align: center; font-size: 50px">ARMOCARSA</h1>
+  <body class="bg-forge-dark text-forge-light antialiased font-body overflow-x-hidden">
+    <div class="grain-overlay"></div>
 
-    <ul class="nav">
-      <p>
-        Somos una empresa ubicada en San Antonio de Los Altos, Edo.
-        Miranda, dedicada desde hace más de 50 años a la Inyección a Presión de
-        Aluminio y Moldeo por Coquilla. Contamos con 40 trabajadores. Durante
-        este periodo hemos elaborado todo tipo de piezas y componentes a
-        distintas empresas del sector automotriz, electrodomésticos, hogar,
-        cocina y construcción, dentro de las cuales podemos mencionar:
-      </p>
-      <ul>
-        <li>DELTA INDUSTRIAL</li>
-        <li>FEMSA</li>
-        <li>OSTER DE VENEZUELA</li>
-        <li>WESTINGHOUSE</li>
-        <li>MOTORVENCA</li>
-        <li>ALUBAT</li>
-        <li>ALCASA</li>
-        <li>VENALUN</li>
-        <li>ALEACIONES NO FERROSAS</li>
-        <li>TRANSFOMETAL</li>
-        <li>METALURGICA EKCO</li>
-        <li>TAURUS / INELEC</li>
-        <li>DURA-LINE</li>
-        <li>PRIMULA FRENTANA</li>
-      </ul>
-      <p></p>
-      <p>
-        📧 Correo electrónico: corporativo@aluminiofundido.com <br />
-        📞 Teléfono: +584142398678 <br />
-        📍 Dirección: Km 14 Carretera Panamericana, Calle Las Industrias, Galpon
-        A. Zona Ind. Las Minas, San Antonio de Los Altos, Municipio Los Salias,
-        Edo. Miranda, Venezuela.<br />
-      </p>
-    </ul>
-    <script src="scripts/main.js"></script>
+    <header class="fixed top-0 left-0 right-0 z-50 bg-forge-dark/90 backdrop-blur-md border-b border-forge-slate/30">
+      <div class="mx-auto max-w-7xl flex items-center justify-between px-4 md:px-8 py-4">
+        <a href="#" class="font-display text-lg md:text-2xl font-bold tracking-tight">
+          <span class="text-forge-light">ARMOCARSA</span>
+          <span class="text-molten">/</span>
+          <span class="text-forge-silver font-light">TODALUM</span>
+        </a>
+        
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#nosotros" class="font-mono text-xs uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Nosotros</a>
+          <a href="#servicios" class="font-mono text-xs uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Servicios</a>
+          <a href="#clientes" class="font-mono text-xs uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Clientes</a>
+          <a href="#contacto" class="font-mono text-xs uppercase tracking-widest border border-molten text-molten px-5 py-2 hover:bg-molten hover:text-white transition-all">Contacto</a>
+        </nav>
+
+        <button id="mobile-menu-btn" class="md:hidden p-2 text-forge-light" aria-label="Toggle menu">
+          <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav id="mobile-menu" class="mobile-menu md:hidden absolute top-full left-0 right-0 bg-forge-charcoal border-b border-forge-slate/30">
+        <div class="flex flex-col px-4 py-8 space-y-6">
+          <a href="#nosotros" class="font-mono text-sm uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Nosotros</a>
+          <a href="#servicios" class="font-mono text-sm uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Servicios</a>
+          <a href="#clientes" class="font-mono text-sm uppercase tracking-widest text-forge-silver hover:text-molten transition-colors">Clientes</a>
+          <a href="#contacto" class="font-mono text-sm uppercase tracking-widest border border-molten text-molten px-6 py-3 text-center hover:bg-molten hover:text-white transition-all">Contacto</a>
+        </div>
+      </nav>
+    </header>
+
+    <section class="relative min-h-screen flex items-center overflow-hidden">
+      <video 
+        autoplay 
+        muted 
+        loop 
+        playsinline
+        class="absolute inset-0 w-full h-full object-cover opacity-40"
+        poster="images/ARMO.jpg"
+      >
+        <source src="images/4941355-hd_1920_1080_25fps.mp4" type="video/mp4">
+      </video>
+      
+      <div class="absolute inset-0 video-overlay"></div>
+      
+      <div class="absolute inset-0 blueprint-grid opacity-30"></div>
+      
+      <div class="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div class="lg:col-span-7 reveal">
+            <div class="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-molten mb-4 md:mb-6">
+              Est. 1974 — San Antonio de Los Altos
+            </div>
+            <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold leading-[0.9] tracking-tight">
+              <span class="block text-forge-light">ALUMINIO</span>
+              <span class="block metallic-text">FUNDIDO</span>
+            </h1>
+            <div class="molten-line w-24 md:w-32 mt-6 md:mt-8"></div>
+          </div>
+          
+          <div class="lg:col-span-5 space-y-6 md:space-y-8 reveal reveal-delay-2">
+            <p class="font-body text-lg md:text-xl lg:text-2xl text-forge-silver leading-relaxed">
+              Inyección a presión de aluminio y moldeo por coquilla con más de 
+              <span class="text-molten font-semibold">50 años</span> de experiencia.
+            </p>
+            
+            <div class="flex flex-wrap gap-4 md:gap-6">
+              <div class="tech-bracket p-4 md:p-6 border border-forge-slate/50 bg-forge-charcoal/50">
+                <div class="font-display text-3xl md:text-4xl font-bold text-molten">40+</div>
+                <div class="font-mono text-xs uppercase tracking-wider text-forge-silver mt-1">Trabajadores</div>
+              </div>
+              <div class="tech-bracket p-4 md:p-6 border border-forge-slate/50 bg-forge-charcoal/50">
+                <div class="font-display text-3xl md:text-4xl font-bold text-molten">50+</div>
+                <div class="font-mono text-xs uppercase tracking-wider text-forge-silver mt-1">Años</div>
+              </div>
+            </div>
+            
+            <a href="#contacto" class="inline-flex items-center gap-3 font-mono text-sm uppercase tracking-widest border-2 border-molten text-molten px-6 md:px-8 py-3 md:py-4 hover:bg-molten hover:text-white transition-all group">
+              <span>Contáctenos</span>
+              <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+        
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden md:flex flex-col items-center gap-2 reveal reveal-delay-4">
+          <span class="font-mono text-xs uppercase tracking-widest text-forge-silver/50">Scroll</span>
+          <div class="w-px h-12 bg-gradient-to-b from-molten to-transparent"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="nosotros" class="relative py-24 md:py-32 lg:py-40 overflow-hidden">
+      <span class="section-number -top-8 md:-top-16 left-0 md:-left-8">01</span>
+      
+      <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+          <div class="lg:col-span-4 reveal">
+            <div class="lg:sticky lg:top-32">
+              <div class="font-mono text-xs uppercase tracking-[0.3em] text-molten mb-4">Sobre Nosotros</div>
+              <h2 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[0.95]">
+                <span class="block text-forge-light">MÁS DE</span>
+                <span class="block text-molten">50 AÑOS</span>
+                <span class="block text-forge-silver">DE EXPERIENCIA</span>
+              </h2>
+              <div class="molten-line w-16 mt-6"></div>
+            </div>
+          </div>
+          
+          <div class="lg:col-span-8 space-y-8 md:space-y-12">
+            <div class="reveal reveal-delay-1">
+              <p class="font-body text-lg md:text-xl lg:text-2xl text-forge-silver leading-relaxed">
+                Somos una empresa ubicada en <span class="text-forge-light font-semibold">San Antonio de Los Altos, Edo. Miranda</span>, 
+                dedicada desde hace más de cinco décadas a la fabricación de piezas de aluminio de la más alta calidad.
+              </p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 reveal reveal-delay-2">
+              <div class="service-card p-6 md:p-8 border border-forge-slate/30">
+                <div class="font-display text-3xl md:text-4xl font-bold text-molten mb-2">1974</div>
+                <div class="font-mono text-xs uppercase tracking-wider text-forge-silver">Fundación</div>
+              </div>
+              <div class="service-card p-6 md:p-8 border border-forge-slate/30">
+                <div class="font-display text-3xl md:text-4xl font-bold text-molten mb-2">40</div>
+                <div class="font-mono text-xs uppercase tracking-wider text-forge-silver">Trabajadores</div>
+              </div>
+              <div class="service-card p-6 md:p-8 border border-forge-slate/30 col-span-2 md:col-span-1">
+                <div class="font-display text-3xl md:text-4xl font-bold text-molten mb-2">14+</div>
+                <div class="font-mono text-xs uppercase tracking-wider text-forge-silver">Clientes Activos</div>
+              </div>
+            </div>
+            
+            <div class="reveal reveal-delay-3">
+              <p class="font-body text-base md:text-lg text-forge-silver/80 leading-relaxed">
+                Durante este período hemos elaborado todo tipo de piezas y componentes para empresas líderes 
+                del sector automotriz, electrodomésticos, hogar, cocina y construcción. Nuestra experiencia 
+                y compromiso con la calidad nos han convertido en un referente de la industria del aluminio en Venezuela.
+              </p>
+            </div>
+            
+            <div class="reveal reveal-delay-4 tech-bracket p-6 md:p-8 border border-forge-slate/30 bg-forge-charcoal/30 blueprint-dots">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full bg-molten/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-mono text-xs uppercase tracking-wider text-molten mb-2">Ubicación</div>
+                  <p class="font-body text-forge-light">
+                    Km 14 Carretera Panamericana, Calle Las Industrias, Galpón A.<br>
+                    Zona Ind. Las Minas, San Antonio de Los Altos, Municipio Los Salias, Edo. Miranda, Venezuela.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="servicios" class="relative py-24 md:py-32 bg-forge-charcoal">
+      <span class="section-number -top-8 md:-top-16 right-0 md:-right-8 text-right">02</span>
+      
+      <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+        <div class="text-center mb-16 reveal">
+          <div class="font-mono text-xs uppercase tracking-[0.3em] text-molten mb-4">Nuestros Servicios</div>
+          <h2 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-forge-light">PROCESOS INDUSTRIALES</h2>
+          <div class="molten-line w-24 mx-auto mt-6"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <div class="service-card reveal reveal-delay-1 p-8 md:p-12 border border-forge-slate/30 group">
+            <div class="w-16 h-16 rounded-full bg-molten/10 flex items-center justify-center mb-6 group-hover:bg-molten/20 transition-colors">
+              <svg class="w-8 h-8 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl md:text-3xl font-bold text-forge-light mb-4">Inyección a Presión</h3>
+            <p class="font-body text-forge-silver leading-relaxed">
+              Proceso de alta precisión para la fabricación de piezas complejas con excelente acabado superficial 
+              y tolerancias estrictas. Ideal para producción en serie.
+            </p>
+          </div>
+          
+          <div class="service-card reveal reveal-delay-2 p-8 md:p-12 border border-forge-slate/30 group">
+            <div class="w-16 h-16 rounded-full bg-molten/10 flex items-center justify-center mb-6 group-hover:bg-molten/20 transition-colors">
+              <svg class="w-8 h-8 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl md:text-3xl font-bold text-forge-light mb-4">Moldeo por Coquilla</h3>
+            <p class="font-body text-forge-silver leading-relaxed">
+              Técnica de fundición en moldes permanentes de metal que permite obtener piezas con alta 
+              densidad y resistencia mecánica superior.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="clientes" class="relative py-24 md:py-32">
+      <div class="max-w-7xl mx-auto px-4 md:px-8">
+        <div class="mb-12 md:mb-16 reveal">
+          <div class="font-mono text-xs uppercase tracking-[0.3em] text-molten mb-4">Confían en Nosotros</div>
+          <h2 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-forge-light">CLIENTES</h2>
+          <div class="molten-line w-16 mt-6"></div>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+          <div class="client-card reveal bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Delta Industrial</span>
+          </div>
+          <div class="client-card reveal reveal-delay-1 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">FEMSA</span>
+          </div>
+          <div class="client-card reveal reveal-delay-2 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Oster Venezuela</span>
+          </div>
+          <div class="client-card reveal reveal-delay-3 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Westinghouse</span>
+          </div>
+          <div class="client-card reveal reveal-delay-4 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Motorvenca</span>
+          </div>
+          <div class="client-card reveal bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Alubat</span>
+          </div>
+          <div class="client-card reveal reveal-delay-1 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Alcasa</span>
+          </div>
+          <div class="client-card reveal reveal-delay-2 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Venalun</span>
+          </div>
+          <div class="client-card reveal reveal-delay-3 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Aleaciones</span>
+          </div>
+          <div class="client-card reveal reveal-delay-4 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Transfometal</span>
+          </div>
+          <div class="client-card reveal bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Metalúrgica EKCO</span>
+          </div>
+          <div class="client-card reveal reveal-delay-1 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Taurus / Inelec</span>
+          </div>
+          <div class="client-card reveal reveal-delay-2 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Dura-Line</span>
+          </div>
+          <div class="client-card reveal reveal-delay-3 bg-forge-charcoal border border-forge-slate/30 p-4 md:p-6 text-center">
+            <span class="font-display text-sm md:text-base font-semibold text-forge-silver uppercase tracking-wide">Primula Frentana</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contacto" class="relative py-24 md:py-32 bg-forge-charcoal">
+      <div class="max-w-4xl mx-auto px-4 md:px-8">
+        <div class="text-center mb-12 reveal">
+          <div class="font-mono text-xs uppercase tracking-[0.3em] text-molten mb-4">Comuníquese</div>
+          <h2 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-forge-light mb-6">CONTACTO</h2>
+          <p class="font-body text-lg md:text-xl text-forge-silver max-w-2xl mx-auto">
+            Estamos listos para atender sus necesidades de fundición de aluminio. 
+            Contáctenos para una cotización personalizada.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div class="reveal reveal-delay-1">
+            <form
+              hx-post="/contact"
+              hx-target="#form-response"
+              hx-swap="innerHTML"
+              class="space-y-5"
+            >
+              <div>
+                <label for="name" class="block font-mono text-xs uppercase tracking-wider text-forge-silver mb-2">Nombre</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  class="form-input w-full bg-forge-dark border border-forge-slate px-4 py-3 text-forge-light placeholder-forge-silver/40 focus:outline-none transition-colors"
+                  placeholder="Su nombre completo"
+                />
+              </div>
+
+              <div>
+                <label for="email" class="block font-mono text-xs uppercase tracking-wider text-forge-silver mb-2">Correo electrónico</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  class="form-input w-full bg-forge-dark border border-forge-slate px-4 py-3 text-forge-light placeholder-forge-silver/40 focus:outline-none transition-colors"
+                  placeholder="correo@ejemplo.com"
+                />
+              </div>
+
+              <div>
+                <label for="phone" class="block font-mono text-xs uppercase tracking-wider text-forge-silver mb-2">Teléfono</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  class="form-input w-full bg-forge-dark border border-forge-slate px-4 py-3 text-forge-light placeholder-forge-silver/40 focus:outline-none transition-colors"
+                  placeholder="+58 414 239 8678"
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="w-full font-mono text-sm uppercase tracking-widest border-2 border-molten text-molten px-6 py-4 hover:bg-molten hover:text-white transition-all"
+              >
+                Enviar Mensaje
+              </button>
+
+              <div id="form-response"></div>
+            </form>
+          </div>
+          
+          <div class="reveal reveal-delay-2 space-y-8">
+            <div class="p-6 border border-forge-slate/30 bg-forge-dark/50">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-molten/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-mono text-xs uppercase tracking-wider text-molten mb-1">Email</div>
+                  <a href="mailto:corporativo@aluminiofundido.com" class="font-body text-forge-light hover:text-molten transition-colors">
+                    corporativo@aluminiofundido.com
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 border border-forge-slate/30 bg-forge-dark/50">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-molten/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-mono text-xs uppercase tracking-wider text-molten mb-1">Teléfono</div>
+                  <a href="tel:+584142398678" class="font-body text-forge-light hover:text-molten transition-colors">
+                    +58 414 239 8678
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 border border-forge-slate/30 bg-forge-dark/50">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-molten/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-molten" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-mono text-xs uppercase tracking-wider text-molten mb-1">Dirección</div>
+                  <p class="font-body text-forge-light text-sm leading-relaxed">
+                    Km 14 Carretera Panamericana, Calle Las Industrias, Galpón A.<br>
+                    Zona Ind. Las Minas, San Antonio de Los Altos, Edo. Miranda, Venezuela.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bg-forge-dark border-t border-forge-slate/30 py-12 md:py-16">
+      <div class="max-w-7xl mx-auto px-4 md:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
+          <div>
+            <div class="font-display text-2xl font-bold mb-4">
+              <span class="text-forge-light">ARMOCARSA</span>
+              <span class="text-molten">/</span>
+              <span class="text-forge-silver font-light">TODALUM</span>
+            </div>
+            <p class="font-body text-forge-silver/70 text-sm leading-relaxed">
+              Más de 50 años dedicados a la excelencia en fundición de aluminio.
+            </p>
+          </div>
+          
+          <div>
+            <div class="font-mono text-xs uppercase tracking-widest text-molten mb-4">Contacto</div>
+            <div class="space-y-3 font-body text-forge-silver/80 text-sm">
+              <p>corporativo@aluminiofundido.com</p>
+              <p>+58 414 239 8678</p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="font-mono text-xs uppercase tracking-widest text-molten mb-4">Ubicación</div>
+            <p class="font-body text-forge-silver/80 text-sm leading-relaxed">
+              Km 14 Carretera Panamericana, Zona Ind. Las Minas<br>
+              San Antonio de Los Altos, Edo. Miranda, Venezuela.
+            </p>
+          </div>
+        </div>
+        
+        <div class="mt-12 pt-8 border-t border-forge-slate/20 text-center">
+          <p class="font-mono text-xs uppercase tracking-widest text-forge-silver/40">
+            © 2024 AluminioFundido — Todos los derechos reservados
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        menuBtn.addEventListener('click', function() {
+          mobileMenu.classList.toggle('open');
+          menuIcon.classList.toggle('hidden');
+          closeIcon.classList.toggle('hidden');
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', function() {
+            mobileMenu.classList.remove('open');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+          });
+        });
+
+        document.addEventListener('click', function(event) {
+          if (!mobileMenu.contains(event.target) && !menuBtn.contains(event.target)) {
+            mobileMenu.classList.remove('open');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+          }
+        });
+      });
+
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    </script>
   </body>
 </html>
